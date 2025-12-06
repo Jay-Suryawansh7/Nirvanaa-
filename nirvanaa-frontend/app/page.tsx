@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { BackgroundImageTexture } from '@/components/ui/bg-image-texture';
 
 interface Case {
   id: string;
@@ -114,23 +115,41 @@ export default function Home() {
         {/* Left Section - Dashboard Metrics */}
         <main className="flex-1 lg:w-2/3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Pending Confirmations</h2>
-              <div className="text-3xl font-bold text-blue-600">12</div>
-              <p className="text-sm text-gray-500 mt-1">Lawyers yet to respond</p>
-            </div>
+            <BackgroundImageTexture
+              variant="fabric-of-squares"
+              opacity={0.3}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+            >
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Pending Confirmations</h2>
+                <div className="text-3xl font-bold text-blue-600">12</div>
+                <p className="text-sm text-gray-500 mt-1">Lawyers yet to respond</p>
+              </div>
+            </BackgroundImageTexture>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ready for Hearing</h2>
-              <div className="text-3xl font-bold text-green-600">5</div>
-              <p className="text-sm text-gray-500 mt-1">Score &ge; 85</p>
-            </div>
+            <BackgroundImageTexture
+              variant="grid-noise"
+              opacity={0.3}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+            >
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ready for Hearing</h2>
+                <div className="text-3xl font-bold text-green-600">5</div>
+                <p className="text-sm text-gray-500 mt-1">Score &ge; 85</p>
+              </div>
+            </BackgroundImageTexture>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Mediation Candidates</h2>
-              <div className="text-3xl font-bold text-purple-600">3</div>
-              <p className="text-sm text-gray-500 mt-1">Both parties willing</p>
-            </div>
+            <BackgroundImageTexture
+              variant="debut-light"
+              opacity={0.3}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+            >
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Mediation Candidates</h2>
+                <div className="text-3xl font-bold text-purple-600">3</div>
+                <p className="text-sm text-gray-500 mt-1">Both parties willing</p>
+              </div>
+            </BackgroundImageTexture>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mt-6">
