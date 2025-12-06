@@ -2,21 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CaseList } from '@/components/case-list';
-import {
-  ExpandableScreen,
-  ExpandableScreenContent,
-  ExpandableScreenTrigger,
-} from '@/components/ui/expandable-screen';
 import axios from 'axios';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { BackgroundImageTexture } from '@/components/ui/bg-image-texture';
+import { Clock, AlertCircle, CheckCircle, FileText, Users, TrendingUp } from 'lucide-react';
 
 interface Case {
   id: string;
+  caseNumber: string;
+  title: string;
   readinessScore: number;
   status: 'READY' | 'MEDIATION_READY' | 'WAITING' | 'PARTIALLY_READY' | 'HIGH_RISK';
   lawyerConfirmed: boolean;
@@ -31,7 +23,6 @@ export default function Home() {
   const router = useRouter();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>('ALL');
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
@@ -57,328 +48,339 @@ export default function Home() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'READY': return 'bg-green-500 hover:bg-green-600';
-      case 'MEDIATION_READY': return 'bg-blue-500 hover:bg-blue-600';
-      case 'WAITING': return 'bg-yellow-500 hover:bg-yellow-600';
-      case 'PARTIALLY_READY': return 'bg-orange-500 hover:bg-orange-600';
-      case 'HIGH_RISK': return 'bg-red-500 hover:bg-red-600';
-      default: return 'bg-gray-500';
+      case 'READY': return '#10b981'; // green
+      case 'MEDIATION_READY': return '#3b82f6'; // blue
+     case 'WAITING': return '#f59e0b'; // yellow/orange
+      case 'PARTIALLY_READY': return '#f59e0b'; // orange
+      case 'HIGH_RISK': return '#ef4444'; // red
+      default: return '#9ca3af';
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 85) return 'text-green-400';
-    if (score >= 50) return 'text-yellow-400';
-    return 'text-red-400';
-  };
-
-  const sendReminder = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await axios.post(`http://localhost:5001/api/cases/${id}/remind`);
-      alert(`Reminder sent for Case ${id}`);
-    } catch (error) {
-      console.error('Failed to send reminder', error);
-      alert('Failed to send reminder');
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'READY': return 'Ready';
+      case 'MEDIATION_READY': return 'Ready';
+      case 'WAITING': return 'Waiting';
+      case 'PARTIALLY_READY': return 'Medium';
+      case 'HIGH_RISK': return 'High';
+      default: return status;
     }
   };
 
-  const filteredCases = filter === 'ALL'
-    ? cases
-    : cases.filter(c => c.status === filter);
-
-  const statusCounts = {
-    ALL: cases.length,
-    READY: cases.filter(c => c.status === 'READY').length,
-    MEDIATION_READY: cases.filter(c => c.status === 'MEDIATION_READY').length,
-    WAITING: cases.filter(c => c.status === 'WAITING').length,
-    PARTIALLY_READY: cases.filter(c => c.status === 'PARTIALLY_READY').length,
-    HIGH_RISK: cases.filter(c => c.status === 'HIGH_RISK').length,
+  const getStatusBgColor = (status: string) => {
+    switch (status) {
+      case 'READY': return 'rgba(16, 185, 129, 0.1)';
+      case 'WAITING': return 'rgba(245, 158, 11, 0.1)';
+      case 'PARTIALLY_READY': return 'rgba(245, 158, 11, 0.1)';
+      case 'HIGH_RISK': return 'rgba(239, 68, 68, 0.1)';
+      default: return 'rgba(156, 163, 175, 0.1)';
+    }
   };
+
+  const totalCases = cases.length;
+  const readyCases = cases.filter(c => c.status === 'READY').length;
+  const highRiskCases = cases.filter(c => c.status === 'HIGH_RISK').length;
+
+  // Calculate overall readiness score
+  const averageScore = cases.length > 0 
+    ? Math.round(cases.reduce((sum, c) => sum + c.readinessScore, 0) / cases.length)
+    : 0;
+
+  // Count incomplete items for urgent gaps
+  const documentsNotFiled = cases.filter(c => !c.documentsReady).length;
+  const pendingWitness = cases.filter(c => !c.witnessConfirmed).length;
+  const lawyerDelayed = cases.filter(c => !c.lawyerConfirmed).length;
 
   if (!authChecked) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center text-foreground">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen p-8" style={{ backgroundColor: '#363636' }}>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white">
-          Nyaya Readiness Dashboard
-        </h1>
-        <p className="text-gray-300 mt-2">
-          AI-Powered Case Readiness &amp; Mediation System
+    <div className="min-h-screen p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 rounded-lg" style={{ background: 'rgba(212, 175, 55, 0.1)' }}>
+            <Users className="w-6 h-6" style={{ color: '#d4af37' }} />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Judicial Dashboard</h1>
+        </div>
+        <p className="text-muted-foreground text-sm">
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
-      </header>
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left Section - Dashboard Metrics */}
-        <main className="flex-1 lg:w-2/3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <BackgroundImageTexture
-              variant="groovepaper"
-              opacity={0.24}
-              className="rounded-lg shadow-sm border border-gray-700 hover:shadow-lg transition-shadow"
-              style={{ backgroundColor: '#010101' }}
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-white">Pending Confirmations</h2>
-                <div className="text-3xl font-bold text-blue-400">12</div>
-                <p className="text-sm text-gray-300 mt-1">Lawyers yet to respond</p>
-              </div>
-            </BackgroundImageTexture>
+      {/* Top Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="rounded-lg p-4 text-center" style={{ background: '#152238', border: '1px solid #2d4a6e' }}>
+          <div className="text-3xl font-bold text-foreground mb-1">{totalCases}</div>
+          <div className="text-sm text-muted-foreground">Today's cases</div>
+        </div>
+        <div className="rounded-lg p-4 text-center" style={{ background: '#152238', border: '1px solid #2d4a6e' }}>
+          <div className="text-3xl font-bold mb-1" style={{ color: '#10b981' }}>{readyCases}</div>
+          <div className="text-sm text-muted-foreground">Ready</div>
+        </div>
+        <div className="rounded-lg p-4 text-center" style={{ background: '#152238', border: '1px solid #2d4a6e' }}>
+          <div className="text-3xl font-bold mb-1" style={{ color: '#ef4444' }}>{highRiskCases}</div>
+          <div className="text-sm text-muted-foreground">High Risk</div>
+        </div>
+      </div>
 
-            <BackgroundImageTexture
-              variant="groovepaper"
-              opacity={0.24}
-              className="rounded-lg shadow-sm border border-gray-700 hover:shadow-lg transition-shadow"
-              style={{ backgroundColor: '#010101' }}
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-white">Ready for Hearing</h2>
-                <div className="text-3xl font-bold text-green-400">5</div>
-                <p className="text-sm text-gray-300 mt-1">Score &ge; 85</p>
-              </div>
-            </BackgroundImageTexture>
-
-            <BackgroundImageTexture
-              variant="groovepaper"
-              opacity={0.24}
-              className="rounded-lg shadow-sm border border-gray-700 hover:shadow-lg transition-shadow"
-              style={{ backgroundColor: '#010101' }}
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-white">Mediation Candidates</h2>
-                <div className="text-3xl font-bold text-purple-400">3</div>
-                <p className="text-sm text-gray-300 mt-1">Both parties willing</p>
-              </div>
-            </BackgroundImageTexture>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-3 gap-6">
+        {/* Daily Case List - 2/3 width */}
+        <div className="col-span-2 rounded-xl p-6" style={{ background: '#152238', border: '1px solid #2d4a6e' }}>
+          <div className="flex items-center gap-2 mb-6">
+            <FileText className="w-5 h-5" style={{ color: '#d4af37' }} />
+            <h2 className="text-xl font-bold text-foreground">Daily Case List</h2>
           </div>
 
-          <BackgroundImageTexture
-            variant="groovepaper"
-            opacity={0.24}
-            className="rounded-lg shadow-sm border border-gray-700 mt-6 hover:shadow-lg transition-shadow"
-            style={{ backgroundColor: '#010101' }}
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4 text-white">Today&apos;s Cases</h2>
-              <div className="sm:rounded-lg">
-                <table className="w-full text-sm text-left text-gray-300">
-                  <thead className="text-xs text-gray-300 uppercase bg-gray-800">
-                    <tr>
-                      <th scope="col" className="px-6 py-3">Case ID</th>
-                      <th scope="col" className="px-6 py-3">Lawyer Confirmed</th>
-                      <th scope="col" className="px-6 py-3">Witness Confirmed</th>
-                      <th scope="col" className="px-6 py-3">Readiness Score</th>
-                      <th scope="col" className="px-6 py-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-gray-700 hover:bg-gray-800">
-                      <td className="px-6 py-4 font-medium text-white whitespace-nowrap">C-2023-001</td>
-                      <td className="px-6 py-4 text-green-400">Yes</td>
-                      <td className="px-6 py-4 text-green-400">Yes</td>
-                      <td className="px-6 py-4 text-white">95</td>
-                      <td className="px-6 py-4"><span className="bg-green-900 text-green-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">READY</span></td>
-                    </tr>
-                    <tr className="border-b border-gray-700 hover:bg-gray-800">
-                      <td className="px-6 py-4 font-medium text-white whitespace-nowrap">C-2023-002</td>
-                      <td className="px-6 py-4 text-red-400">No</td>
-                      <td className="px-6 py-4 text-gray-400">Pending</td>
-                      <td className="px-6 py-4 text-white">30</td>
-                      <td className="px-6 py-4"><span className="bg-yellow-900 text-yellow-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">PARTIALLY_READY</span></td>
-                    </tr>
-                  </tbody>
-                </table>
+          {/* Tabs */}
+          <div className="flex gap-4 mb-6">
+            {['All Cases', 'Ready', 'Waiting', 'High Risk'].map((tab, idx) => (
+              <button 
+                key={tab}
+                className="px-4 py-2 rounded text-sm font-medium transition-colors"
+                style={{ 
+                  background: idx === 0 ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                  color: idx === 0 ? '#d4af37' : '#9ca3af',
+                  border: idx === 0 ? '1px solid #d4af37' : '1px solid transparent'
+                }}
+              >
+                {tab} {idx === 0 && <span className="ml-1 text-xs">({cases.length})</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* Case Cards */}
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2" style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#2d4a6e #152238'
+          }}>
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading cases...</div>
+            ) : cases.slice(0, 8).map((c) => (
+              <div 
+                key={c.id}
+                className="rounded-lg p-4 transition-all hover:border-primary cursor-pointer"
+                style={{ 
+                  background: '#1e3a5f',
+                  border: '1px solid #2d4a6e'
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    {/* Status Icon */}
+                    <div 
+                      className="flex-shrink-0 p-2 rounded-full"
+                      style={{ background: getStatusBgColor(c.status) }}
+                    >
+                      {c.status === 'READY' ? (
+                        <CheckCircle className="w-5 h-5" style={{ color: getStatusColor(c.status) }} />
+                      ) : c.status === 'HIGH_RISK' ? (
+                        <AlertCircle className="w-5 h-5" style={{ color: getStatusColor(c.status) }} />
+                      ) : (
+                        <Clock className="w-5 h-5" style={{ color: getStatusColor(c.status) }} />
+                      )}
+                    </div>
+
+                    {/* Case Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span 
+                          className="text-xs px-2 py-0.5 rounded font-medium"
+                          style={{ 
+                            background: getStatusBgColor(c.status),
+                            color: getStatusColor(c.status)
+                          }}
+                        >
+                          {c.caseNumber || c.id}
+                        </span>
+                        <span 
+                          className="text-xs px-2 py-0.5 rounded font-semibold"
+                          style={{ 
+                            background: getStatusBgColor(c.status),
+                            color: getStatusColor(c.status)
+                          }}
+                        >
+                          {getStatusLabel(c.status)}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium text-foreground">{c.title}</div>
+                    </div>
+                  </div>
+
+                  {/* Right Side */}
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <div className="text-xs text-muted-foreground mb-1">Hearing</div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" style={{ color: '#d4af37' }} />
+                        <span className="text-sm font-medium text-foreground">9:00 AM</span>
+                      </div>
+                    </div>
+
+                    <div className="text-right min-w-[80px]">
+                      <div className="text-xs text-muted-foreground mb-1">Readiness</div>
+                      <div className="text-sm font-bold" style={{ 
+                        color: c.readinessScore >= 80 ? '#10b981' : c.readinessScore >= 50 ? '#f59e0b' : '#ef4444'
+                      }}>
+                        {c.readinessScore}%
+                      </div>
+                    </div>
+
+                    <button 
+                      className="px-4 py-2 rounded text-sm font-semibold transition-colors"
+                      style={{ 
+                        background: 'rgba(212, 175, 55, 0.1)',
+                        color: '#d4af37',
+                        border: '1px solid #d4af37'
+                      }}
+                    >
+                      Open Case
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="space-y-6">
+          {/* Case Readiness */}
+          <div className="rounded-xl p-6" style={{ background: '#152238', border: '1px solid #2d4a6e' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-foreground">Case Readiness</h3>
+              <span className="text-xs text-muted-foreground">Overall preparation status</span>
+            </div>
+
+            {/* Circular Score */}
+            <div className="flex items-center justify-center py-6">
+              <div className="relative w-32 h-32">
+                <svg className="w-full h-full -rotate-90">
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="#2d4a6e"
+                    strokeWidth="8"
+                    fill="none"
+                  />
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="#d4af37"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 56 * (averageScore / 100)} ${2 * Math.PI * 56}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-3xl font-bold" style={{ color: '#10b981' }}>{averageScore}</div>
+                  <div className="text-xs text-muted-foreground">Score</div>
+                </div>
               </div>
             </div>
-          </BackgroundImageTexture>
-        </main>
 
-        {/* Right Section - Cases Panel */}
-        <aside className="lg:w-1/3">
-          <BackgroundImageTexture
-            variant="groovepaper"
-            opacity={0.24}
-            className="rounded-lg shadow-sm border border-gray-700 sticky top-8 hover:shadow-lg transition-shadow"
-            style={{ backgroundColor: '#010101' }}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-white">All Cases</h2>
-                <span className="bg-blue-900 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded">
-                  Live
+            {/* Progress Bars */}
+            <div className="space-y-4 mt-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">Documents Filed</span>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: '#10b981' }}>
+                    {Math.round(((cases.length - documentsNotFiled) / (cases.length || 1)) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full" style={{ background: '#1e3a5f' }}>
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      background: '#10b981',
+                      width: `${((cases.length - documentsNotFiled) / (cases.length || 1)) * 100}%`
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">Witness Confirmation</span>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: '#f59e0b' }}>
+                    {Math.round(((cases.length - pendingWitness) / (cases.length || 1)) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full" style={{ background: '#1e3a5f' }}>
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      background: '#f59e0b',
+                      width: `${((cases.length - pendingWitness) / (cases.length || 1)) * 100}%`
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">Lawyer Readiness</span>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: '#10b981' }}>
+                    {Math.round(((cases.length - lawyerDelayed) / (cases.length || 1)) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full" style={{ background: '#1e3a5f' }}>
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      background: '#10b981',
+                      width: `${((cases.length - lawyerDelayed) / (cases.length || 1)) * 100}%`
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Urgent Gaps */}
+          <div className="rounded-xl p-6" style={{ background: '#152238', border: '1px solid #2d4a6e' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <AlertCircle className="w-5 h-5" style={{ color: '#ef4444' }} />
+              <h3 className="text-lg font-bold text-foreground">Urgent Gaps</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full mt-1.5" style={{ background: '#ef4444' }} />
+                <span className="text-sm text-foreground">
+                  Evidence documentation requires additional verification
                 </span>
               </div>
-              <p className="text-sm text-gray-300 mb-4">
-                Real-time case data from the backend API
-              </p>
-              <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
-                <CaseList />
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full mt-1.5" style={{ background: '#ef4444' }} />
+                <span className="text-sm text-foreground">
+                  Pending witness depositions from defendant's side
+                </span>
               </div>
-
-              {/* Expandable Screen for View All Cases */}
-              <ExpandableScreen
-                layoutId="view-all-cases"
-                triggerRadius="8px"
-                contentRadius="16px"
-                animationDuration={0.4}
-              >
-                <ExpandableScreenTrigger className="mt-4 w-full">
-                  <button className="group cursor-pointer w-full px-5 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex justify-between items-center font-semibold transition-all shadow-lg hover:shadow-xl">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                      </svg>
-                      View All Cases
-                    </span>
-                    <div className="group-hover:translate-x-2 transition-transform">
-                      <ArrowRight className="w-5 h-5" />
-                    </div>
-                  </button>
-                </ExpandableScreenTrigger>
-
-                <ExpandableScreenContent className="bg-[#2a2a2a] overflow-auto">
-                  <div className="p-8 min-h-full">
-                    {/* Header */}
-                    <div className="mb-8">
-                      <h1 className="text-3xl font-bold text-white mb-2">
-                        Case Management
-                      </h1>
-                      <p className="text-gray-400">
-                        View and manage all cases in the system
-                      </p>
-                    </div>
-
-                    {/* Filter Tabs */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {[
-                        { key: 'ALL', label: 'All Cases', color: 'bg-gray-600' },
-                        { key: 'READY', label: 'Ready', color: 'bg-green-500' },
-                        { key: 'MEDIATION_READY', label: 'Mediation Ready', color: 'bg-blue-500' },
-                        { key: 'WAITING', label: 'Waiting', color: 'bg-yellow-500' },
-                        { key: 'PARTIALLY_READY', label: 'Partially Ready', color: 'bg-orange-500' },
-                        { key: 'HIGH_RISK', label: 'High Risk', color: 'bg-red-500' },
-                      ].map(({ key, label, color }) => (
-                        <button
-                          key={key}
-                          onClick={() => setFilter(key)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${filter === key
-                            ? `${color} text-white shadow-lg scale-105`
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
-                            }`}
-                        >
-                          {label} ({statusCounts[key as keyof typeof statusCounts]})
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-end mb-4">
-                      <Button onClick={fetchCases} variant="outline" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600">
-                        🔄 Refresh
-                      </Button>
-                    </div>
-
-                    {/* Cases Grid */}
-                    {loading ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                      </div>
-                    ) : filteredCases.length === 0 ? (
-                      <div className="text-center py-12 bg-gray-800 rounded-lg border border-gray-700">
-                        <p className="text-gray-400 text-lg">No cases found</p>
-                        <p className="text-gray-500 text-sm mt-2">
-                          {filter !== 'ALL' ? 'Try selecting a different filter' : 'Add cases via the API'}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredCases.map((c) => (
-                          <Card key={c.id} className="bg-gray-800 border-gray-700 hover:shadow-lg transition-shadow cursor-pointer border-l-4" style={{ borderLeftColor: c.status === 'READY' ? '#22c55e' : c.status === 'MEDIATION_READY' ? '#3b82f6' : c.status === 'WAITING' ? '#eab308' : c.status === 'PARTIALLY_READY' ? '#f97316' : c.status === 'HIGH_RISK' ? '#ef4444' : '#6b7280' }}>
-                            <CardHeader className="pb-2">
-                              <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg font-bold text-white">Case {c.id}</CardTitle>
-                                <Badge className={getStatusColor(c.status)}>
-                                  {c.status.replace('_', ' ')}
-                                </Badge>
-                              </div>
-                            </CardHeader>
-                            <CardContent>
-                              {/* Readiness Score */}
-                              <div className="mb-4">
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-sm text-gray-400">Readiness Score</span>
-                                  <span className={`text-2xl font-bold ${getScoreColor(c.readinessScore)}`}>
-                                    {c.readinessScore}/100
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-700 rounded-full h-2">
-                                  <div
-                                    className={`h-2 rounded-full ${c.readinessScore >= 85 ? 'bg-green-500' : c.readinessScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                                    style={{ width: `${c.readinessScore}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-
-                              {/* Status Indicators */}
-                              <div className="space-y-2 text-sm">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-400">Lawyer</span>
-                                  {c.lawyerConfirmed ? (
-                                    <span className="text-green-400 font-medium">✅ Confirmed</span>
-                                  ) : (
-                                    <span className="text-yellow-400 font-medium">⚠️ Pending</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-400">Witness</span>
-                                  {c.witnessConfirmed ? (
-                                    <span className="text-green-400 font-medium">✅ Confirmed</span>
-                                  ) : (
-                                    <span className="text-yellow-400 font-medium">⚠️ Pending</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-400">Documents</span>
-                                  {c.documentsReady ? (
-                                    <span className="text-green-400 font-medium">✅ Ready</span>
-                                  ) : (
-                                    <span className="text-red-400 font-medium">❌ Not Ready</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-400">Mediation</span>
-                                  <span className={`font-medium ${c.mediationWilling === 'BOTH' ? 'text-green-400' : c.mediationWilling === 'ONE_PARTY' ? 'text-yellow-400' : 'text-gray-500'}`}>
-                                    {c.mediationWilling === 'BOTH' ? '✅ Both Willing' : c.mediationWilling === 'ONE_PARTY' ? '⚠️ One Party' : '➖ None'}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Actions */}
-                              {!c.lawyerConfirmed && (
-                                <div className="mt-4 pt-4 border-t border-gray-700">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
-                                    onClick={(e) => sendReminder(c.id, e)}
-                                  >
-                                    📧 Send Reminder to Lawyer
-                                  </Button>
-                                </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </ExpandableScreenContent>
-              </ExpandableScreen>
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full mt-1.5" style={{ background: '#ef4444' }} />
+                <span className="text-sm text-foreground">
+                  Lawyer response delayed for motion hearing
+                </span>
+              </div>
             </div>
-          </BackgroundImageTexture>
-        </aside>
+          </div>
+        </div>
       </div>
     </div>
   );

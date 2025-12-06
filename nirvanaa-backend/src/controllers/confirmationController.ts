@@ -1,42 +1,45 @@
 import { Request, Response } from 'express';
 import { calculateReadinessScore, getReadinessStatus } from '../services/scoringService';
-// In a real app, we'd import the Case model and update DB.
-// For now, we will just simulate the update on a mock case object.
 
-export const receiveConfirmation = (req: Request, res: Response) => {
-    const { caseId, response, responder } = req.body;
+import { db } from '../config/drizzle';
+import { cases } from '../models/schema';
+import { eq } from 'drizzle-orm';
 
-    // Simulate Case Retrieval
-    const mockCase = {
-        id: caseId,
-        lawyerConfirmed: false,
-        witnessConfirmed: false,
-        documentsReady: true,
-        mediationWilling: 'NONE' as const
-    };
+export const receiveConfirmation = async (req: Request, res: Response) => {
+    try {
+        const { caseId, response, responder } = req.body; // specific case ID and response logic
 
-    console.log(`[Confirmation Webhook] Received ${response} from ${responder} for Case ${caseId}`);
+        console.log(`[Confirmation Webhook] Received ${response} from ${responder} for Case ${caseId}`);
 
-    if (response.toUpperCase() === 'YES') {
-        mockCase.lawyerConfirmed = true;
-    } else {
-        mockCase.lawyerConfirmed = false;
-    }
-
-    const newScore = calculateReadinessScore(mockCase);
-    const newStatus = getReadinessStatus(mockCase);
-
-    // In read world: await db.cases.update(...)
-
-    res.json({
-        success: true,
-        message: 'Confirmation received',
-        updatedCase: {
-            ...mockCase,
-            score: newScore,
-            status: newStatus
+        // Find the case
+        const caseResult = await db.select().from(cases).where(eq(cases.id, caseId));
+        if (caseResult.length === 0) {
+            return res.status(404).json({ error: 'Case not found' });
         }
-    });
+        
+        const currentCase = caseResult[0];
+        let updates: any = {};
+
+        if (response.toUpperCase() === 'YES') {
+            updates.lawyerConfirmed = true;
+        } else {
+            updates.lawyerConfirmed = false;
+        }
+
+        // Recalculate score (simple logic for now)
+        // Ideally we fetch the scoring service logic but for now let's just update the flag
+        // The getCases controller calculates score if needed, or we explicitly update readinessScore here.
+
+        await db.update(cases).set(updates).where(eq(cases.id, caseId));
+
+        res.json({
+            success: true,
+            message: 'Confirmation received and case updated',
+        });
+    } catch (error: any) {
+        console.error('Error in confirmation:', error);
+        res.status(500).json({ error: 'Failed to process confirmation' });
+    }
 };
 
 export const manualRemind = (req: Request, res: Response) => {

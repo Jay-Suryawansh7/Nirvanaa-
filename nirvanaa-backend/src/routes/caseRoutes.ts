@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { getCases, getCaseMetrics } from '../controllers/caseController';
+import { getCases, getCaseMetrics, createCase } from '../controllers/caseController';
 import { manualRemind, receiveConfirmation } from '../controllers/confirmationController';
 
 const router = Router();
 
 router.get('/', getCases);
+router.post('/', createCase);
 router.get('/metrics', getCaseMetrics);
 
 // Feature 3 Routes
