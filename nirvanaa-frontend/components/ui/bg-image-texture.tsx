@@ -14,6 +14,7 @@ interface BackgroundImageTextureProps {
   variant?: TextureVariant
   opacity?: number
   className?: string
+  style?: React.CSSProperties
   children?: React.ReactNode
 }
 
@@ -30,12 +31,13 @@ export function BackgroundImageTexture({
   variant = "fabric-of-squares",
   opacity = 0.5,
   className,
+  style,
   children,
 }: BackgroundImageTextureProps) {
   const textureUrl = variant !== "none" ? textureMap[variant] : null
 
   return (
-    <div className={cn("relative overflow-hidden", className)}>
+    <div className={cn("relative overflow-hidden", className)} style={style}>
       {textureUrl && (
         <div
           aria-hidden="true"

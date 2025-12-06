@@ -118,36 +118,39 @@ export default function Home() {
             <BackgroundImageTexture
               variant="groovepaper"
               opacity={0.24}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+              className="rounded-lg shadow-sm border border-gray-700 hover:shadow-lg transition-shadow"
+              style={{ backgroundColor: '#010101' }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Pending Confirmations</h2>
-                <div className="text-3xl font-bold text-blue-600">12</div>
-                <p className="text-sm text-gray-500 mt-1">Lawyers yet to respond</p>
+                <h2 className="text-xl font-semibold mb-4 text-white">Pending Confirmations</h2>
+                <div className="text-3xl font-bold text-blue-400">12</div>
+                <p className="text-sm text-gray-300 mt-1">Lawyers yet to respond</p>
               </div>
             </BackgroundImageTexture>
 
             <BackgroundImageTexture
               variant="groovepaper"
               opacity={0.24}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+              className="rounded-lg shadow-sm border border-gray-700 hover:shadow-lg transition-shadow"
+              style={{ backgroundColor: '#010101' }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ready for Hearing</h2>
-                <div className="text-3xl font-bold text-green-600">5</div>
-                <p className="text-sm text-gray-500 mt-1">Score &ge; 85</p>
+                <h2 className="text-xl font-semibold mb-4 text-white">Ready for Hearing</h2>
+                <div className="text-3xl font-bold text-green-400">5</div>
+                <p className="text-sm text-gray-300 mt-1">Score &ge; 85</p>
               </div>
             </BackgroundImageTexture>
 
             <BackgroundImageTexture
               variant="groovepaper"
               opacity={0.24}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+              className="rounded-lg shadow-sm border border-gray-700 hover:shadow-lg transition-shadow"
+              style={{ backgroundColor: '#010101' }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Mediation Candidates</h2>
-                <div className="text-3xl font-bold text-purple-600">3</div>
-                <p className="text-sm text-gray-500 mt-1">Both parties willing</p>
+                <h2 className="text-xl font-semibold mb-4 text-white">Mediation Candidates</h2>
+                <div className="text-3xl font-bold text-purple-400">3</div>
+                <p className="text-sm text-gray-300 mt-1">Both parties willing</p>
               </div>
             </BackgroundImageTexture>
           </div>
@@ -155,13 +158,14 @@ export default function Home() {
           <BackgroundImageTexture
             variant="groovepaper"
             opacity={0.24}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mt-6 hover:shadow-lg transition-shadow"
+            className="rounded-lg shadow-sm border border-gray-700 mt-6 hover:shadow-lg transition-shadow"
+            style={{ backgroundColor: '#010101' }}
           >
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Today&apos;s Cases</h2>
+              <h2 className="text-xl font-semibold mb-4 text-white">Today&apos;s Cases</h2>
               <div className="sm:rounded-lg">
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table className="w-full text-sm text-left text-gray-300">
+                  <thead className="text-xs text-gray-300 uppercase bg-gray-800">
                     <tr>
                       <th scope="col" className="px-6 py-3">Case ID</th>
                       <th scope="col" className="px-6 py-3">Lawyer Confirmed</th>
@@ -171,19 +175,19 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">C-2023-001</td>
-                      <td className="px-6 py-4 text-green-600">Yes</td>
-                      <td className="px-6 py-4 text-green-600">Yes</td>
-                      <td className="px-6 py-4">95</td>
-                      <td className="px-6 py-4"><span className="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">READY</span></td>
+                    <tr className="border-b border-gray-700 hover:bg-gray-800">
+                      <td className="px-6 py-4 font-medium text-white whitespace-nowrap">C-2023-001</td>
+                      <td className="px-6 py-4 text-green-400">Yes</td>
+                      <td className="px-6 py-4 text-green-400">Yes</td>
+                      <td className="px-6 py-4 text-white">95</td>
+                      <td className="px-6 py-4"><span className="bg-green-900 text-green-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">READY</span></td>
                     </tr>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">C-2023-002</td>
-                      <td className="px-6 py-4 text-red-600">No</td>
+                    <tr className="border-b border-gray-700 hover:bg-gray-800">
+                      <td className="px-6 py-4 font-medium text-white whitespace-nowrap">C-2023-002</td>
+                      <td className="px-6 py-4 text-red-400">No</td>
                       <td className="px-6 py-4 text-gray-400">Pending</td>
-                      <td className="px-6 py-4">30</td>
-                      <td className="px-6 py-4"><span className="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">PARTIALLY_READY</span></td>
+                      <td className="px-6 py-4 text-white">30</td>
+                      <td className="px-6 py-4"><span className="bg-yellow-900 text-yellow-300 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">PARTIALLY_READY</span></td>
                     </tr>
                   </tbody>
                 </table>
@@ -197,16 +201,17 @@ export default function Home() {
           <BackgroundImageTexture
             variant="groovepaper"
             opacity={0.24}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 sticky top-8 hover:shadow-lg transition-shadow"
+            className="rounded-lg shadow-sm border border-gray-700 sticky top-8 hover:shadow-lg transition-shadow"
+            style={{ backgroundColor: '#010101' }}
           >
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">All Cases</h2>
-                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                <h2 className="text-xl font-semibold text-white">All Cases</h2>
+                <span className="bg-blue-900 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded">
                   Live
                 </span>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-sm text-gray-300 mb-4">
                 Real-time case data from the backend API
               </p>
               <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
