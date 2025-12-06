@@ -1,111 +1,151 @@
-# 🚀 Nyaya Readiness – AI Case Readiness & Mediation Dashboard  
-### *Solving Court Delays with Real-Time Readiness, Confirmations & Mediation Routing*  
-> **Built for PKP Mumbai Hackathon 2025**
+# 🚀 Nyaya Readiness – AI Case Readiness, Research & Mediation Dashboard  
+### *Project for PKP Mumbai Hackathon 2025*  
+
+## 📌 Problem Statement – PKPLG03  
+**Delays in Justice System:**  
+Case backlogs cause prolonged trials.  
+**How can technology streamline case management, research, and dispute resolution?**
 
 
-## ⭐ Overview
-Indian courts face **4.5+ crore pending cases** and nearly **50% of daily listed cases get adjourned** due to:
+
+## ⭐ Overview  
+India’s courts suffer from **4.5+ crore pending cases**, with nearly **50% adjourned daily** due to:
 - Lawyer no-shows  
-- Missing witnesses  
-- Unprepared documents  
+- Witness absence  
+- Unprepared documentation  
 - Missed mediation opportunities  
 
-**Nyaya Readiness** is an AI-powered dashboard that helps judges identify which cases are ready for hearing, prevent avoidable adjournments, and accelerate resolutions.
+**Nyaya Readiness** is a judge-first platform that solves these problems using:
+- A **real-time Case Readiness Engine**  
+- A **lawyer confirmation workflow**  
+- A **faster AI-aided research module**  
+- A **smart mediation routing system**
+
+This directly addresses all three components of **PKPLG03:**
+**Case Management + Research + Dispute Resolution**.
 
 
-## 🎯 Key Features (MVP)
 
-### ✅ 1. Case Readiness Score (0–100)
-Automatically calculates readiness using:
-- Lawyer confirmation  
-- Witness readiness  
-- Document status  
+## 🎯 Key Features (Hackathon MVP)
+
+### ✅ 1. Case Readiness Score (0–100)  
+Automated scoring based on:
+- Lawyer confirmation (24h + 1h)
+- Witness confirmation  
+- Document readiness  
 - Mediation willingness  
 
-Color-coded status:  
-**READY | MEDIATION_READY | WAITING | PARTIALLY_READY | HIGH_RISK**
+Status Codes:  
+**READY, MEDIATION_READY, WAITING, PARTIALLY_READY, HIGH_RISK**
+
 
 
 ### ✅ 2. Judge Dashboard  
-A clean, judge-first interface to:
-- View and sort daily cases  
-- Access detailed case breakdown  
-- Notify lawyers  
-- Start hearing  
-- Reschedule  
-- Trigger mediation  
+- View daily cases in one place  
+- Color-coded readiness  
+- Quick actions: Start Hearing / Notify Lawyer / Reschedule  
+- Detailed case sidebar  
+- AI suggestions (rule-based)
 
 
-### ✅ 3. Lawyer Confirmation System (24h + 1h)
-Reduces no-shows with:
-- Automated reminders  
-- YES/NO response parsing  
-- Judge alerts for unconfirmed/no-show lawyers  
-- Confirmation audit trail  
+
+### ✅ 3. Lawyer Confirmation System  
+Reduces no-shows using:
+- Automatic SMS reminders  
+- YES/NO response capture  
+- No-show detection  
+- Judge alerts in dashboard  
+- Full audit log  
+
 
 
 ### ✅ 4. Mediation Module  
-- Detects cases where both parties are willing  
+Accelerates dispute resolution:
+- Detects MEDIATION_READY cases  
 - One-click mediation initiation  
-- Assign mediator + schedule slot  
-- Track outcomes (SETTLED / NOT_SETTLED)
+- Assign mediator  
+- Schedule session  
+- Track outcome (SETTLED / NOT_SETTLED)
+
+
 
 
 ### ✅ 5. Lawyer Accountability Metrics  
-Tracks each lawyer’s:
+Tracks:
 - Confirmation rate  
 - No-show count  
 - Avg response time  
-- Badge: **CLEAR / WARNING / FLAGGED**
+- Badge: **CLEAR / WARNING / FLAGGED**  
+
+Creates transparent reliability—*not punishment*.
+
+
+
+## 🧠 Impact (Aligned to PKPLG03)
+
+| Challenge | Our Solution | Impact |
+|----------|--------------|--------|
+| Slow case management | Readiness Score + Dashboard | Fewer adjournments |
+| Slow dispute resolution | Mediation module | More settlements |
+| System backlog | Scheduling clarity | Faster case movement |
+| Lawyer unreliability | Confirmation + metrics | Accountability |
 
 
 ## 🛠️ Tech Stack  
-**Frontend:** Next.js 14, React, TypeScript, shadcn/ui, Tailwind CSS  
-**Backend:** Next.js API Routes, Node.js  
-**Database:** PostgreSQL (Neon) + Drizzle ORM  
-**Integrations:** SMS/WhatsApp (mocked in MVP)
+
+**Frontend:**  
+- Next.js 14  
+- React + TypeScript  
+- Tailwind CSS  
+- shadcn/ui  
+
+**Backend:**  
+- Next.js API Routes (Node.js)  
+- Drizzle ORM  
+
+**Database:**  
+- PostgreSQL (Neon)  
+
+
+**Hosting:**  
+- Render
+
+**Notifications:**  
+- SMS/WhatsApp (Mock for MVP, Twilio-ready)
 
 
 
 ## 🏗️ Architecture (MVP)
-Frontend (Next.js + React)
+
+Frontend (Next.js)
 ↓
-Backend (Next.js API Routes)
+Backend API (Next.js API Routes)
 ↓
-Database (PostgreSQL – Neon)
+PostgreSQL Database (Neon)
 ↓
-Mock Notification Engine 
-
-## ⚡ Impact
-| Problem | Our Fix | Result |
-|--------|----------|--------|
-| Lawyer no-shows | Confirmation workflow | Fewer adjournments |
-| Unready cases | Readiness scoring | Judge knows what to hear |
-| Slow mediation | Mediation-ready flag | Faster settlements |
-| No accountability | Lawyer metrics | Transparent reliability |
+Mock Notification Engine
 
 
-
-## 📅 Hackathon MVP Achieved
+## 📅 Hackathon Deliverables (Completed)
 - ✔ Judge Dashboard  
-- ✔ Case Readiness Scoring Engine  
-- ✔ Lawyer Confirmation (Simulated)  
+- ✔ Case Readiness Score Engine  
+- ✔ Lawyer Confirmation Flow (Simulated)  
 - ✔ Mediation Flow  
-- ✔ Lawyer Metrics (Basic)  
-- ✔ PostgreSQL + Drizzle  
-- ✔ End-to-End Demo Ready  
+- ✔ Basic AI Research Module (Optional)  
+- ✔ Lawyer Accountability System  
+- ✔ Full demo-ready MVP  
 
+---
 
-## 🛣️ Future Roadmap
+## 🛣️ Future Development
 - Real SMS/WhatsApp integration  
-- Lawyer mobile app  
-- Witness confirmations  
-- AI-based mediation predictor  
-- Court SSO integration  
-- Advanced analytics dashboard  
+- Lawyer mobile app (React Native)  
+- Witness confirmation system  
+- Predictive mediation ML model  
+- Court SSO + eCourts API sync  
+- Analytics dashboard  
 
 ---
 
 ## 👥 Team  
 **Nirvanaa – Nyaya**
-
