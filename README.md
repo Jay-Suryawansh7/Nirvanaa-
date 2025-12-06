@@ -135,7 +135,7 @@ Mock Notification Engine
 - ✔ Lawyer Accountability System  
 - ✔ Full demo-ready MVP  
 
----
+
 
 ## 🛣️ Future Development
 - Real SMS/WhatsApp integration  
@@ -145,7 +145,7 @@ Mock Notification Engine
 - Court SSO + eCourts API sync  
 - Analytics dashboard  
 
----
+
 
 ## 👥 Team  
 **Nirvanaa – Nyaya**
