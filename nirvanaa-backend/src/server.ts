@@ -15,6 +15,16 @@ app.use(express.json());
 app.use('/api/auth', authRoutes); // Mount auth routes
 app.use('/api/cases', caseRoutes);
 
+// Root route
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Nirvanaa Backend API is running! 🚀',
+        endpoints: {
+            cases: '/api/cases'
+        }
+    });
+});
+
 const PORT = parseInt(process.env.PORT || '5001');
 
 if (require.main === module) {
