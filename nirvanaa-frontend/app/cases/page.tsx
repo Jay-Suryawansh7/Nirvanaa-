@@ -4,8 +4,13 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+    Expandable,
+    ExpandableCard,
+    ExpandableContent,
+    ExpandableTrigger,
+} from '@/components/ui/expandable';
 
 interface Case {
     id: string;
@@ -47,6 +52,17 @@ export default function CasesPage() {
             case 'PARTIALLY_READY': return 'bg-orange-500 hover:bg-orange-600';
             case 'HIGH_RISK': return 'bg-red-500 hover:bg-red-600';
             default: return 'bg-gray-500';
+        }
+    };
+
+    const getStatusBorderColor = (status: string) => {
+        switch (status) {
+            case 'READY': return '#22c55e';
+            case 'MEDIATION_READY': return '#3b82f6';
+            case 'WAITING': return '#eab308';
+            case 'PARTIALLY_READY': return '#f97316';
+            case 'HIGH_RISK': return '#ef4444';
+            default: return '#6b7280';
         }
     };
 
@@ -93,7 +109,7 @@ export default function CasesPage() {
                             Case Management
                         </h1>
                         <p className="text-gray-300 mt-2">
-                            View and manage all cases in the system
+                            View and manage all cases in the system. Click on a card to expand details.
                         </p>
                     </div>
                     <Button onClick={fetchCases} variant="outline">
@@ -140,84 +156,131 @@ export default function CasesPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCases.map((c) => (
-                        <Card key={c.id} className="hover:shadow-lg transition-shadow cursor-pointer border-l-4" style={{ borderLeftColor: getStatusColor(c.status).includes('green') ? '#22c55e' : getStatusColor(c.status).includes('blue') ? '#3b82f6' : getStatusColor(c.status).includes('yellow') ? '#eab308' : getStatusColor(c.status).includes('orange') ? '#f97316' : getStatusColor(c.status).includes('red') ? '#ef4444' : '#6b7280' }}>
-                            <CardHeader className="pb-2">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-lg font-bold">Case {c.id}</CardTitle>
-                                    <Badge className={getStatusColor(c.status)}>
-                                        {c.status.replace('_', ' ')}
-                                    </Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {/* Readiness Score */}
-                                <div className="mb-4">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm text-gray-500">Readiness Score</span>
-                                        <span className={`text-2xl font-bold ${getScoreColor(c.readinessScore)}`}>
-                                            {c.readinessScore}/100
-                                        </span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div
-                                            className={`h-2 rounded-full ${c.readinessScore >= 85 ? 'bg-green-500' : c.readinessScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                                            style={{ width: `${c.readinessScore}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
+                        <Expandable key={c.id} expandDirection="vertical" expandBehavior="replace">
+                            {({ isExpanded }) => (
+                                <div
+                                    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 overflow-hidden"
+                                    style={{ borderLeftColor: getStatusBorderColor(c.status) }}
+                                >
+                                    {/* Collapsed View - Always Visible */}
+                                    <ExpandableTrigger>
+                                        <div className="p-4 cursor-pointer">
+                                            {/* Header */}
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                                    Case {c.id}
+                                                </h3>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge className={getStatusColor(c.status)}>
+                                                        {c.status.replace('_', ' ')}
+                                                    </Badge>
+                                                    <span className="text-xs text-gray-500">
+                                                        {isExpanded ? '▲' : '▼'}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                {/* Status Indicators */}
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-600 dark:text-gray-400">Lawyer</span>
-                                        {c.lawyerConfirmed ? (
-                                            <span className="text-green-600 font-medium">✅ Confirmed</span>
-                                        ) : (
-                                            <span className="text-yellow-600 font-medium">⚠️ Pending</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-600 dark:text-gray-400">Witness</span>
-                                        {c.witnessConfirmed ? (
-                                            <span className="text-green-600 font-medium">✅ Confirmed</span>
-                                        ) : (
-                                            <span className="text-yellow-600 font-medium">⚠️ Pending</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-600 dark:text-gray-400">Documents</span>
-                                        {c.documentsReady ? (
-                                            <span className="text-green-600 font-medium">✅ Ready</span>
-                                        ) : (
-                                            <span className="text-red-600 font-medium">❌ Not Ready</span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-600 dark:text-gray-400">Mediation</span>
-                                        <span className={`font-medium ${c.mediationWilling === 'BOTH' ? 'text-green-600' : c.mediationWilling === 'ONE_PARTY' ? 'text-yellow-600' : 'text-gray-500'}`}>
-                                            {c.mediationWilling === 'BOTH' ? '✅ Both Willing' : c.mediationWilling === 'ONE_PARTY' ? '⚠️ One Party' : '➖ None'}
-                                        </span>
-                                    </div>
-                                </div>
+                                            {/* Readiness Score - Always Visible */}
+                                            <div className="mb-2">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-sm text-gray-500">Readiness Score</span>
+                                                    <span className={`text-2xl font-bold ${getScoreColor(c.readinessScore)}`}>
+                                                        {c.readinessScore}/100
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                                    <div
+                                                        className={`h-2 rounded-full transition-all duration-500 ${c.readinessScore >= 85 ? 'bg-green-500' : c.readinessScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                                        style={{ width: `${c.readinessScore}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
 
-                                {/* Actions */}
-                                {!c.lawyerConfirmed && (
-                                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="w-full"
-                                            onClick={(e) => sendReminder(c.id, e)}
-                                        >
-                                            📧 Send Reminder to Lawyer
-                                        </Button>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                            {/* Quick Summary - Always Visible */}
+                                            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-3">
+                                                <span className={c.lawyerConfirmed ? 'text-green-600' : 'text-yellow-600'}>
+                                                    {c.lawyerConfirmed ? '✅' : '⚠️'} Lawyer
+                                                </span>
+                                                <span className={c.witnessConfirmed ? 'text-green-600' : 'text-yellow-600'}>
+                                                    {c.witnessConfirmed ? '✅' : '⚠️'} Witness
+                                                </span>
+                                                <span className={c.documentsReady ? 'text-green-600' : 'text-red-600'}>
+                                                    {c.documentsReady ? '✅' : '❌'} Docs
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ExpandableTrigger>
+
+                                    {/* Expanded View - Additional Details */}
+                                    <ExpandableContent preset="slide-up">
+                                        <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700 pt-4">
+                                            {/* Detailed Status Indicators */}
+                                            <div className="space-y-3 text-sm">
+                                                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                                    <span className="text-gray-600 dark:text-gray-400 font-medium">Lawyer Status</span>
+                                                    {c.lawyerConfirmed ? (
+                                                        <span className="text-green-600 font-semibold">✅ Confirmed</span>
+                                                    ) : (
+                                                        <span className="text-yellow-600 font-semibold">⚠️ Awaiting Confirmation</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                                    <span className="text-gray-600 dark:text-gray-400 font-medium">Witness Status</span>
+                                                    {c.witnessConfirmed ? (
+                                                        <span className="text-green-600 font-semibold">✅ Confirmed</span>
+                                                    ) : (
+                                                        <span className="text-yellow-600 font-semibold">⚠️ Awaiting Confirmation</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                                    <span className="text-gray-600 dark:text-gray-400 font-medium">Documents</span>
+                                                    {c.documentsReady ? (
+                                                        <span className="text-green-600 font-semibold">✅ All Ready</span>
+                                                    ) : (
+                                                        <span className="text-red-600 font-semibold">❌ Pending Documents</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                                    <span className="text-gray-600 dark:text-gray-400 font-medium">Mediation Willingness</span>
+                                                    <span className={`font-semibold ${c.mediationWilling === 'BOTH' ? 'text-green-600' : c.mediationWilling === 'ONE_PARTY' ? 'text-yellow-600' : 'text-gray-500'}`}>
+                                                        {c.mediationWilling === 'BOTH' ? '✅ Both Parties Willing' : c.mediationWilling === 'ONE_PARTY' ? '⚠️ One Party Willing' : '➖ No Willingness'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 space-y-2">
+                                                {!c.lawyerConfirmed && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                                                        onClick={(e) => sendReminder(c.id, e)}
+                                                    >
+                                                        📧 Send Reminder to Lawyer
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        alert(`View full details for Case ${c.id}`);
+                                                    }}
+                                                >
+                                                    📋 View Full Case Details
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </ExpandableContent>
+                                </div>
+                            )}
+                        </Expandable>
                     ))}
                 </div>
             )}
         </div>
     );
 }
+
