@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface Case {
   id: string;
@@ -46,6 +47,17 @@ export function CaseList() {
     }
   };
 
+  const sendReminder = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await axios.post(`http://localhost:5001/api/cases/${id}/remind`);
+      alert(`Reminder sent for Case ${id}`);
+    } catch (error) {
+      console.error('Failed to send reminder', error);
+      alert('Failed to send reminder');
+    }
+  };
+
   if (loading) return <div>Loading cases...</div>;
 
   return (
@@ -53,15 +65,31 @@ export function CaseList() {
       {cases.map((c) => (
         <Card key={c.id} className="hover:bg-accent/50 transition-colors cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Case {c.id}</CardTitle>
-            <Badge className={getStatusColor(c.status)}>{c.status.replace('_', ' ')}</Badge>
+            <div className="flex flex-col">
+                <CardTitle className="text-sm font-medium">Case {c.id}</CardTitle>
+                <div className="text-xs text-muted-foreground mt-1">
+                    {c.lawyerConfirmed ? (
+                        <span className="text-green-600 font-bold">✓ Lawyer Confirmed</span>
+                    ) : (
+                        <span className="text-yellow-600 font-bold">⚠ Lawyer Pending</span>
+                    )}
+                </div>
+            </div>
+            <div className="flex items-center gap-2">
+                {!c.lawyerConfirmed && (
+                    <Button variant="outline" size="sm" onClick={(e) => sendReminder(c.id, e)}>
+                        Send Reminder
+                    </Button>
+                )}
+                <Badge className={getStatusColor(c.status)}>{c.status.replace('_', ' ')}</Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{c.readinessScore}/100</div>
-            <p className="text-xs text-muted-foreground">
-              Lawyer: {c.lawyerConfirmed ? '✅' : '❌'} | 
+            <p className="text-xs text-muted-foreground mt-2">
               Witness: {c.witnessConfirmed ? '✅' : '❌'} | 
-              Docs: {c.documentsReady ? '✅' : '❌'}
+              Docs: {c.documentsReady ? '✅' : '❌'} | 
+              Mediation: {c.mediationWilling}
             </p>
           </CardContent>
         </Card>
