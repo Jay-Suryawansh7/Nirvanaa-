@@ -116,8 +116,8 @@ export default function Home() {
         <main className="flex-1 lg:w-2/3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <BackgroundImageTexture
-              variant="fabric-of-squares"
-              opacity={0.3}
+              variant="groovepaper"
+              opacity={0.24}
               className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
             >
               <div className="p-6">
@@ -128,8 +128,8 @@ export default function Home() {
             </BackgroundImageTexture>
 
             <BackgroundImageTexture
-              variant="grid-noise"
-              opacity={0.3}
+              variant="groovepaper"
+              opacity={0.24}
               className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
             >
               <div className="p-6">
@@ -140,8 +140,8 @@ export default function Home() {
             </BackgroundImageTexture>
 
             <BackgroundImageTexture
-              variant="debut-light"
-              opacity={0.3}
+              variant="groovepaper"
+              opacity={0.24}
               className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
             >
               <div className="p-6">
@@ -154,7 +154,7 @@ export default function Home() {
 
           <BackgroundImageTexture
             variant="groovepaper"
-            opacity={0.4}
+            opacity={0.24}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mt-6 hover:shadow-lg transition-shadow"
           >
             <div className="p-6">
@@ -195,8 +195,8 @@ export default function Home() {
         {/* Right Section - Cases Panel */}
         <aside className="lg:w-1/3">
           <BackgroundImageTexture
-            variant="inflicted"
-            opacity={0.25}
+            variant="groovepaper"
+            opacity={0.24}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 sticky top-8 hover:shadow-lg transition-shadow"
           >
             <div className="p-6">
