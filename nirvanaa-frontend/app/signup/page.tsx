@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { authApi } from "@/lib/api";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -10,29 +11,21 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("LAWYER"); // Default role
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5001/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Registration failed");
-      }
-
-      // Redirect to login on success
+      await authApi.register({ name, email, password, role });
       router.push("/login?registered=true");
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,7 +58,7 @@ export default function SignupPage() {
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
                 Email address
@@ -133,7 +126,7 @@ export default function SignupPage() {
               Sign up
             </button>
           </div>
-          
+
           <div className="text-sm text-center">
             <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
               Already have an account? Sign in
