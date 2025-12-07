@@ -8,3 +8,12 @@ services:
     envVars:
       - key: PORT
         value: 10000
+
+staticSites:
+  - name: nirvanaa-frontend
+    buildCommand: cd nirvanaa-frontend && npm install && npm run build
+    publishDir: nirvanaa-frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
