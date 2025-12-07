@@ -16,7 +16,7 @@ export const documents = pgTable("documents", {
   fileName: varchar("file_name", { length: 255 }),
   fileUrl: text("file_url"), // URL or path to storage
   mimeType: varchar("mime_type", { length: 100 }),
-  size: integer("size"), // Size in bytes
+  size: varchar("size", { length: 50 }), // Size string e.g. "1.2 MB"
   isReady: boolean("is_ready").default(false),
   status: varchar("status", { length: 20 }).default("PENDING"), // VERIFIED, REJECTED, PENDING
   uploadedBy: uuid("uploaded_by"),
