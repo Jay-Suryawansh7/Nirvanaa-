@@ -78,6 +78,11 @@ const fetchHearings = async () => {
     return res.data;
 };
 
+const fetchCases = async () => {
+    const res = await api.get("/cases");
+    return res.data;
+};
+
 function JudgeCalendar() {
   const role = localStorage.getItem("role") || "Viewer";
   const [date, setDate] = useState<Date | undefined>(new Date()); 
@@ -118,6 +123,11 @@ function JudgeCalendar() {
   const { data: hearings = [] } = useQuery<FetchedHearing[]>({
       queryKey: ["hearings"],
       queryFn: fetchHearings
+  });
+
+  const { data: cases = [] } = useQuery({
+      queryKey: ["cases"],
+      queryFn: fetchCases
   });
 
   const getHearingsForDate = (checkDate: Date) => {
@@ -473,8 +483,19 @@ function JudgeCalendar() {
               <Input id="title" {...form.register("title")} placeholder="e.g. Initial Hearing" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="caseId">Case ID (UUID)</Label>
-              <Input id="caseId" {...form.register("caseId")} placeholder="Case UUID" />
+              <Label htmlFor="caseId">Select Case</Label>
+               <Select onValueChange={(val) => form.setValue("caseId", val)}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select a case" />
+                </SelectTrigger>
+                <SelectContent>
+                    {cases.map((c: any) => (
+                        <SelectItem key={c.id} value={c.id}>
+                            {c.caseTitle} ({c.caseNumber})
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">

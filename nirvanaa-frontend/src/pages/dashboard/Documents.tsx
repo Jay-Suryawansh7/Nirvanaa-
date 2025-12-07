@@ -46,6 +46,11 @@ const fetchDocuments = async () => {
     return res.data;
 };
 
+const fetchCases = async () => {
+    const res = await api.get("/cases");
+    return res.data;
+};
+
 export default function Documents() {
   const role = localStorage.getItem("role") || "Viewer";
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,6 +97,11 @@ export default function Documents() {
   const { data: documents = [], isLoading } = useQuery({
       queryKey: ["documents"],
       queryFn: fetchDocuments
+  });
+
+  const { data: cases = [] } = useQuery({
+      queryKey: ["cases"],
+      queryFn: fetchCases
   });
 
   const filteredDocs = documents.filter((doc: any) => 
@@ -213,8 +223,19 @@ export default function Documents() {
               <Input id="fileName" {...form.register("fileName")} placeholder="e.g. Case_Order.pdf" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="caseId">Case ID (UUID)</Label>
-              <Input id="caseId" {...form.register("caseId")} placeholder="Case UUID" />
+              <Label htmlFor="caseId">Select Case</Label>
+              <Select onValueChange={(val) => form.setValue("caseId", val)}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select a case" />
+                </SelectTrigger>
+                <SelectContent>
+                    {cases.map((c: any) => (
+                        <SelectItem key={c.id} value={c.id}>
+                            {c.caseTitle} ({c.caseNumber})
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="checklistItem">Type / Checklist Item</Label>
