@@ -31,7 +31,6 @@ export default function LawyerDashboard() {
       caseTitle: "",
       courtType: "High Court",
       category: "Civil",
-      nextHearingDate: "",
       documents: "" // Comma separated for "init" feature
   });
 
@@ -53,7 +52,6 @@ export default function LawyerDashboard() {
               caseTitle: "",
               courtType: "High Court",
               category: "Civil",
-              nextHearingDate: "",
               documents: ""
           });
       },
@@ -109,11 +107,7 @@ export default function LawyerDashboard() {
                             <Label htmlFor="category">Category</Label>
                             <Input id="category" name="category" value={formData.category} onChange={handleInputChange} required />
                         </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="nextHearingDate">Next Hearing Date</Label>
-                            <Input id="nextHearingDate" name="nextHearingDate" type="datetime-local" value={formData.nextHearingDate} onChange={handleInputChange} required />
-                        </div>
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="documents">Initial Documents (Comma separated names)</Label>
                             <Input id="documents" name="documents" placeholder="Petition, Affidavit..." value={formData.documents} onChange={handleInputChange} />
                         </div>

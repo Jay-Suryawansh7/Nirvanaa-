@@ -177,10 +177,10 @@ export const createCase = async (req: Request, res: Response) => {
         caseTitle,
         courtType,
         category,
-        nextHearingDate: new Date(nextHearingDate),
         assignedLawyerId: userId, // Auto-assign to creating lawyer
         status: "PENDING",
-        documentStatus: docList && docList.length > 0 ? "PARTIAL" : "PENDING"
+        documentStatus: docList && docList.length > 0 ? "PARTIAL" : "PENDING",
+        ...(nextHearingDate ? { nextHearingDate: new Date(nextHearingDate) } : {})
     }).returning();
 
     // Insert Documents (Checklist items)
