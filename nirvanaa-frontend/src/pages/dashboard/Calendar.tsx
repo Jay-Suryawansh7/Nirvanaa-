@@ -37,7 +37,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const hearingSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  caseId: z.string().min(1, "Case ID is required"),
+  caseId: z.string().uuid("Case ID must be a valid UUID"),
   type: z.string().min(1, "Type is required"),
   date: z.string().min(1, "Date is required"),
   startTime: z.string().min(1, "Start time is required"),

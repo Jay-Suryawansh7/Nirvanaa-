@@ -33,7 +33,7 @@ import {
 
 const documentSchema = z.object({
   fileName: z.string().min(1, "File name is required"),
-  caseId: z.string().min(1, "Case ID is required"),
+  caseId: z.string().uuid("Case ID must be a valid UUID"),
   checklistItem: z.string().min(1, "Checklist item is required"),
   mimeType: z.string().optional(),
   size: z.string().optional(),
