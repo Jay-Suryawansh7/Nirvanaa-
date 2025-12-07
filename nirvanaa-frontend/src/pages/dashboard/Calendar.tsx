@@ -2,12 +2,12 @@ import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon, Clock, MapPin, FileUser, ChevronRight, Filter, Plus, MoreHorizontal, Gavel, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, FileUser, ChevronRight, Plus, MoreHorizontal, Gavel } from "lucide-react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DayContent, DayContentProps } from "react-day-picker";
+import { DayContentProps } from "react-day-picker";
 
 // Mock Data
 const MOCK_HEARINGS = [
