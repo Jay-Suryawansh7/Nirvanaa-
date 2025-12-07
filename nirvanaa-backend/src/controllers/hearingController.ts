@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { db } from "../config/db";
 import { hearings } from "../schemas/hearings";
 import { eq, desc } from "drizzle-orm";
+import { expandToUuid } from "../utils/uuidHelper";
 
 export const getHearings = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -32,7 +33,7 @@ export const createHearing = async (req: Request, res: Response): Promise<void> 
       location,
       priority: priority || "MEDIUM",
       description,
-      caseId
+      caseId: expandToUuid(caseId)
     }).returning();
 
     res.status(201).json(newHearing[0]);

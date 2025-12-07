@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { db } from "../config/db";
 import { documents } from "../schemas/documents";
 import { eq, desc } from "drizzle-orm";
+import { expandToUuid } from "../utils/uuidHelper";
 
 export const getDocuments = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -23,7 +24,7 @@ export const createDocument = async (req: Request, res: Response): Promise<void>
     }
 
     const newDoc = await db.insert(documents).values({
-      caseId,
+      caseId: expandToUuid(caseId),
       checklistItem,
       fileName,
       fileUrl,
