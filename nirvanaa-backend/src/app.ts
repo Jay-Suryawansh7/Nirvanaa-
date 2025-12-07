@@ -6,7 +6,7 @@ import { json } from "express";
 const app = express();
 
 // CORS Configuration - Must be first
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://nirvanaa.onrender.com"];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
