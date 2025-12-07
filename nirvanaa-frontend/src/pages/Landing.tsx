@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { 
   Scale, 
   ArrowRight, 
@@ -12,13 +12,12 @@ import {
   Users, 
   CheckCircle, 
   Gavel,
-  Clock,
   Award
 } from "lucide-react";
 
 export default function Landing() {
   // Animation variants
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
@@ -29,19 +28,13 @@ export default function Landing() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: { 
       y: 0, 
       opacity: 1,
       transition: { type: "spring", stiffness: 100 }
     }
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
   };
 
   return (
