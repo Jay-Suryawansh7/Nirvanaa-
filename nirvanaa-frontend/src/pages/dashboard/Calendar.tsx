@@ -54,6 +54,25 @@ import api from "@/lib/api";
 import LawyerCalendar from "./LawyerCalendar";
 import CourtStaffCalendar from "./CourtStaffCalendar";
 
+interface FetchedHearing {
+  id: string;
+  caseTitle: string;
+  caseNumber: string;
+  type: string;
+  date: string;
+  time: string;
+  endTime: string;
+  location: string;
+  priority: "URGENT" | "HIGH" | "MEDIUM" | "LOW";
+  status: string;
+  judge: string;
+  description?: string;
+  plaintiff?: string;
+  defendant?: string;
+  attorneys?: string[];
+  documents?: string[];
+}
+
 const fetchHearings = async () => {
     const res = await api.get("/hearings");
     return res.data;
