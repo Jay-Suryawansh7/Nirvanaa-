@@ -32,19 +32,19 @@ function Calendar({
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
+        table: "w-full border-collapse space-y-1 table-fixed",
         head_row: "",
         head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+          "text-muted-foreground rounded-md font-normal text-[0.8rem]",
         row: "w-full mt-2",
         // simplified cell – no range background, only focus handling
         cell:
-          "h-9 w-9 text-center text-sm p-0 relative " +
+          "h-9 text-center text-sm p-0 relative " +
           "focus-within:relative focus-within:z-20",
         // circular day button, looks like a chip when selected
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal rounded-full aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal rounded-full aria-selected:opacity-100 mx-auto"
         ),
         // filled primary circle for selected date
         day_selected:
