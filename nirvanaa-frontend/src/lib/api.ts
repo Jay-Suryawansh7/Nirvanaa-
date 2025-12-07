@@ -26,7 +26,7 @@ api.interceptors.request.use(
 // Response Interceptor: Handle Errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
       console.error("API Error Response:", error.response.data);
       const { status, data } = error.response;
