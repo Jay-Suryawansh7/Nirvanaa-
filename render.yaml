@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: nirvanaa-backend
+    env: node
+    plan: free
+    buildCommand: cd nirvanaa-backend && npm install && npm run build
+    startCommand: cd nirvanaa-backend && npm start
+    envVars:
+      - key: PORT
+        value: 10000
