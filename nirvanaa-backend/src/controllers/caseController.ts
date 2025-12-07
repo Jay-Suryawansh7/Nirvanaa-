@@ -52,7 +52,8 @@ export const getAllCases = async (req: Request, res: Response) => {
 export const getCaseById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    
+    console.log(`[getCaseById] Fetching case ID: ${id}`);
+
     // Join with users table to get lawyer name
     const result = await db.select({
         caseData: cases,
@@ -62,9 +63,15 @@ export const getCaseById = async (req: Request, res: Response) => {
     .leftJoin(users, eq(cases.assignedLawyerId, users.id))
     .where(eq(cases.id, id));
     
-    if (result.length === 0) return res.status(404).json({ message: "Case not found" });
+    if (result.length === 0) {
+        console.warn(`[getCaseById] Case not found: ${id}`);
+        return res.status(404).json({ message: "Case not found" });
+    }
 
     const { caseData, lawyerName } = result[0];
+
+    // Fetch documents
+    const caseDocuments = await db.select().from(documents).where(eq(documents.caseId, id));
 
     const score = calculateReadinessScore(
       caseData.lawyerConfirmation || false,
@@ -74,11 +81,14 @@ export const getCaseById = async (req: Request, res: Response) => {
 
     res.json({
       ...caseData,
-      assignedLawyerName: lawyerName, // Return the name explicitly
+      assignedLawyerName: lawyerName,
+      documents: caseDocuments, // Return documents
       computedScore: score,
       readinessStatus: getReadinessStatus(score)
     });
   } catch (error) {
+    // @ts-ignore
+    console.error(`[getCaseById] Error: ${error.message}`, error);
     res.status(500).json({ message: "Error fetching case", error });
   }
 };
