@@ -36,7 +36,7 @@ const documentSchema = z.object({
   caseId: z.string().uuid("Case ID must be a valid UUID"),
   checklistItem: z.string().min(1, "Checklist item is required"),
   mimeType: z.string().optional(),
-  size: z.string().optional(),
+  size: z.number().optional(),
 });
 
 type DocumentFormValues = z.infer<typeof documentSchema>;
@@ -51,6 +51,15 @@ const fetchCases = async () => {
     return res.data;
 };
 
+const formatBytes = (bytes: number, decimals = 2) => {
+    if (!bytes) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
 export default function Documents() {
   const role = localStorage.getItem("role") || "Viewer";
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,12 +69,12 @@ export default function Documents() {
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
-    defaultValues: {
+      defaultValues: {
       fileName: "",
       caseId: "",
       checklistItem: "",
       mimeType: "application/pdf",
-      size: "1.2 MB" 
+      size: 1258291 // ~1.2 MB
     }
   });
 
@@ -180,7 +189,7 @@ export default function Documents() {
                                         <TableCell className="hidden sm:table-cell">
                                             <Badge variant="outline" className="whitespace-nowrap">{doc.checklistItem}</Badge>
                                         </TableCell>
-                                        <TableCell className="hidden md:table-cell">{doc.size || 'N/A'}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{doc.size ? formatBytes(doc.size) : 'N/A'}</TableCell>
                                         <TableCell className="hidden md:table-cell whitespace-nowrap">
                                             {doc.updatedAt ? format(new Date(doc.updatedAt), "MMM d, yyyy") : "N/A"}
                                         </TableCell>
