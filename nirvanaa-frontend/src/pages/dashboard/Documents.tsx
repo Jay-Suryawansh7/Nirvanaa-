@@ -6,31 +6,104 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FileText, Upload, Download, Eye, Search, Filter } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Mock data for demonstration
-const MOCK_DOCUMENTS = [
-  { id: 1, name: "Case_File_2024_001.pdf", type: "Petition", caseNumber: "CN-2024-001", size: "2.4 MB", date: "2024-12-01", status: "Verified" },
-  { id: 2, name: "Evidence_List_A.docx", type: "Evidence", caseNumber: "CN-2024-001", size: "1.1 MB", date: "2024-12-02", status: "Pending" },
-  { id: 3, name: "Court_Order_Interim.pdf", type: "Order", caseNumber: "CN-2023-884", size: "850 KB", date: "2024-11-28", status: "Verified" },
-  { id: 4, name: "Witness_Statement_Key.pdf", type: "Statement", caseNumber: "CN-2024-003", size: "3.2 MB", date: "2024-12-05", status: "Rejected" },
-  { id: 5, name: "Bail_Application.pdf", type: "Application", caseNumber: "CN-2024-005", size: "1.5 MB", date: "2024-12-06", status: "Pending" },
-  { id: 6, name: "Hearing_Transcript_Nov.txt", type: "Transcript", caseNumber: "CN-2023-884", size: "120 KB", date: "2024-11-30", status: "Verified" },
-];
+const documentSchema = z.object({
+  fileName: z.string().min(1, "File name is required"),
+  caseId: z.string().min(1, "Case ID is required"),
+  checklistItem: z.string().min(1, "Checklist item is required"),
+  mimeType: z.string().optional(),
+  size: z.string().optional(),
+});
+
+type DocumentFormValues = z.infer<typeof documentSchema>;
+
+const fetchDocuments = async () => {
+    const res = await api.get("/documents");
+    return res.data;
+};
 
 export default function Documents() {
   const role = localStorage.getItem("role") || "Viewer";
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredDocs = MOCK_DOCUMENTS.filter(doc => 
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.caseNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  const queryClient = useQueryClient();
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+
+  const form = useForm<DocumentFormValues>({
+    resolver: zodResolver(documentSchema),
+    defaultValues: {
+      fileName: "",
+      caseId: "",
+      checklistItem: "",
+      mimeType: "application/pdf",
+      size: "1.2 MB" 
+    }
+  });
+
+  const createDocumentMutation = useMutation({
+    mutationFn: async (data: DocumentFormValues) => {
+      // Mock file upload logic - just sending metadata
+      await api.post("/documents", {
+        ...data,
+        fileUrl: "https://example.com/mock-file.pdf",
+        status: "PENDING"
+      });
+    },
+    onSuccess: () => {
+      toast.success("Document uploaded successfully");
+      setIsUploadOpen(false);
+      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to upload document");
+      console.error(error);
+    }
+  });
+
+  const onSubmit = (data: DocumentFormValues) => {
+    createDocumentMutation.mutate(data);
+  };
+
+  const { data: documents = [], isLoading } = useQuery({
+      queryKey: ["documents"],
+      queryFn: fetchDocuments
+  });
+
+  const filteredDocs = documents.filter((doc: any) => 
+    (doc.fileName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (doc.checklistItem?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   return (
     <AppLayout role={role}>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-primary">Document Repository</h1>
-        <Button>
+        <Button onClick={() => setIsUploadOpen(true)}>
           <Upload className="mr-2 h-4 w-4" /> Upload Document
         </Button>
       </div>
@@ -64,7 +137,7 @@ export default function Documents() {
                             <TableRow>
                                 <TableHead>Document Name</TableHead>
                                 <TableHead>Type</TableHead>
-                                <TableHead className="hidden sm:table-cell">Case Number</TableHead>
+                                <TableHead className="hidden sm:table-cell">Checklist Item</TableHead>
                                 <TableHead className="hidden md:table-cell">Size</TableHead>
                                 <TableHead className="hidden md:table-cell">Upload Date</TableHead>
                                 <TableHead>Status</TableHead>
@@ -72,33 +145,41 @@ export default function Documents() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredDocs.length === 0 ? (
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="h-24 text-center">
+                                        Loading documents...
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredDocs.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="h-24 text-center">
                                         No documents found.
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredDocs.map((doc) => (
+                                filteredDocs.map((doc: any) => (
                                     <TableRow key={doc.id}>
                                         <TableCell className="font-medium">
                                             <div className="flex items-center gap-2">
                                                 <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                                                <span className="truncate max-w-[150px] sm:max-w-xs" title={doc.name}>{doc.name}</span>
+                                                <span className="truncate max-w-[150px] sm:max-w-xs" title={doc.fileName}>{doc.fileName}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{doc.type}</TableCell>
+                                        <TableCell>{doc.mimeType?.split('/')[1]?.toUpperCase() || 'N/A'}</TableCell>
                                         <TableCell className="hidden sm:table-cell">
-                                            <Badge variant="outline" className="whitespace-nowrap">{doc.caseNumber}</Badge>
+                                            <Badge variant="outline" className="whitespace-nowrap">{doc.checklistItem}</Badge>
                                         </TableCell>
-                                        <TableCell className="hidden md:table-cell">{doc.size}</TableCell>
-                                        <TableCell className="hidden md:table-cell whitespace-nowrap">{doc.date}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{doc.size || 'N/A'}</TableCell>
+                                        <TableCell className="hidden md:table-cell whitespace-nowrap">
+                                            {doc.updatedAt ? format(new Date(doc.updatedAt), "MMM d, yyyy") : "N/A"}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge variant={
-                                                doc.status === "Verified" ? "default" : 
-                                                doc.status === "Rejected" ? "destructive" : "secondary"
+                                                doc.status === "VERIFIED" ? "default" : 
+                                                doc.status === "REJECTED" ? "destructive" : "secondary"
                                             }>
-                                                {doc.status}
+                                                {doc.status || "PENDING"}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -120,6 +201,44 @@ export default function Documents() {
             </CardContent>
         </Card>
       </div>
+      <Sheet open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+        <SheetContent className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Upload Document</SheetTitle>
+            <SheetDescription>Enter document details. File upload is simulated.</SheetDescription>
+          </SheetHeader>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="fileName">File Name</Label>
+              <Input id="fileName" {...form.register("fileName")} placeholder="e.g. Case_Order.pdf" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="caseId">Case ID (UUID)</Label>
+              <Input id="caseId" {...form.register("caseId")} placeholder="Case UUID" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="checklistItem">Type / Checklist Item</Label>
+               <Select onValueChange={(val) => form.setValue("checklistItem", val)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select document type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Petition">Petition</SelectItem>
+                        <SelectItem value="Evidence">Evidence</SelectItem>
+                        <SelectItem value="Order">Order</SelectItem>
+                        <SelectItem value="Statement">Statement</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                 </Select>
+            </div>
+            <SheetFooter>
+              <Button type="submit" disabled={createDocumentMutation.isPending}>
+                {createDocumentMutation.isPending ? "Uploading..." : "Upload"}
+              </Button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
     </AppLayout>
   );
 }

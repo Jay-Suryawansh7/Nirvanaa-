@@ -7,26 +7,99 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Mail, Phone, MapPin, Briefcase, Plus } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import api from "@/lib/api";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
-// Mock data
-const CONTACTS = [
-  { id: 1, name: "Hon. Justice Sharma", role: "Judge", type: "Judge", email: "j.sharma@court.gov.in", phone: "+91 11-2338-1234", location: "Courtroom 304", avatar: "JS" },
-  { id: 2, name: "Adv. Rajesh Verma", role: "Senior Counsel", type: "Lawyer", email: "rajesh.verma@legal.com", phone: "+91 98765-43210", location: "Verma Associates", avatar: "RV" },
-  { id: 3, name: "Sarah Jenkins", role: "Court Clerk", type: "Staff", email: "sarah.j@court.gov.in", phone: "+91 11-2338-5678", location: "Registry Office", avatar: "SJ" },
-  { id: 4, name: "Hon. Justice Iyer", role: "Judge", type: "Judge", email: "k.iyer@court.gov.in", phone: "+91 11-2338-4321", location: "Courtroom 501", avatar: "JI" },
-  { id: 5, name: "Adv. Meera Kapoor", role: "Defense Attorney", type: "Lawyer", email: "meera.k@legalsolutions.in", phone: "+91 99887-77665", location: "Kapoor Legal", avatar: "MK" },
-  { id: 6, name: "Amit Singh", role: "Bailiff", type: "Staff", email: "amit.s@court.gov.in", phone: "+91 98989-12121", location: "Security Desk", avatar: "AS" },
-];
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  role: z.string().min(1, "Role is required"),
+  type: z.string().min(1, "Type is required"),
+  email: z.string().email("Invalid email").min(1, "Email is required"),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  organization: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type ContactFormValues = z.infer<typeof contactSchema>;
+
+const fetchContacts = async () => {
+    const res = await api.get("/contacts");
+    return res.data;
+};
 
 export default function Contacts() {
   const role = localStorage.getItem("role") || "Viewer";
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  const filteredContacts = CONTACTS.filter(contact => {
-    const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          contact.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTab = activeTab === "all" || contact.type.toLowerCase() === activeTab;
+  const queryClient = useQueryClient();
+  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: {
+      name: "",
+      role: "",
+      type: "Lawyer",
+      email: "",
+      phone: "",
+      location: "",
+      organization: "",
+      notes: ""
+    }
+  });
+
+  const createContactMutation = useMutation({
+    mutationFn: async (data: ContactFormValues) => {
+      await api.post("/contacts", data);
+    },
+    onSuccess: () => {
+      toast.success("Contact added successfully");
+      setIsAddOpen(false);
+      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to add contact");
+      console.error(error);
+    }
+  });
+
+  const onSubmit = (data: ContactFormValues) => {
+    createContactMutation.mutate(data);
+  };
+
+  const { data: contacts = [], isLoading } = useQuery({
+      queryKey: ["contacts"],
+      queryFn: fetchContacts
+  });
+
+  const filteredContacts = contacts.filter((contact: any) => {
+    const matchesSearch = (contact.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+                          (contact.role?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+    const matchesTab = activeTab === "all" || (contact.type?.toLowerCase() || "") === activeTab;
     return matchesSearch && matchesTab;
   });
 
@@ -37,7 +110,7 @@ export default function Contacts() {
            <h1 className="text-3xl font-bold text-primary">Contacts Directory</h1>
            <p className="text-muted-foreground">Manage and view professional contacts linked to your cases.</p>
         </div>
-        <Button>
+        <Button onClick={() => setIsAddOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Add Contact
         </Button>
       </div>
@@ -66,16 +139,16 @@ export default function Contacts() {
 
                 {/* We render the same grid for all tabs, filtering is handled by state logic above to avoid duplication */}
                 <TabsContent value="all" className="mt-6">
-                   <ContactGrid contacts={filteredContacts} />
+                   <ContactGrid contacts={filteredContacts} isLoading={isLoading} />
                 </TabsContent>
                 <TabsContent value="judge" className="mt-6">
-                   <ContactGrid contacts={filteredContacts} />
+                   <ContactGrid contacts={filteredContacts} isLoading={isLoading} />
                 </TabsContent>
                 <TabsContent value="lawyer" className="mt-6">
-                   <ContactGrid contacts={filteredContacts} />
+                   <ContactGrid contacts={filteredContacts} isLoading={isLoading} />
                 </TabsContent>
                 <TabsContent value="staff" className="mt-6">
-                   <ContactGrid contacts={filteredContacts} />
+                   <ContactGrid contacts={filteredContacts} isLoading={isLoading} />
                 </TabsContent>
             </Tabs>
         </div>
@@ -99,23 +172,87 @@ export default function Contacts() {
             </Card>
         </div>
       </div>
+      <Sheet open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <SheetContent className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Add New Contact</SheetTitle>
+            <SheetDescription>Enter the details for the new contact.</SheetDescription>
+          </SheetHeader>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input id="name" {...form.register("name")} placeholder="e.g. Adv. Rajesh Verma" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-2">
+                 <Label htmlFor="type">Type</Label>
+                 <Select onValueChange={(val) => form.setValue("type", val)} defaultValue="Lawyer">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Judge">Judge</SelectItem>
+                        <SelectItem value="Lawyer">Lawyer</SelectItem>
+                        <SelectItem value="Staff">Court Staff</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                 </Select>
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="role">Role / Designation</Label>
+                 <Input id="role" {...form.register("role")} placeholder="e.g. Senior Counsel" />
+               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" {...form.register("email")} placeholder="email@example.com" />
+            </div>
+             <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-2">
+                 <Label htmlFor="phone">Phone (Optional)</Label>
+                 <Input id="phone" {...form.register("phone")} placeholder="+91..." />
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="organization">Organization (Optional)</Label>
+                 <Input id="organization" {...form.register("organization")} placeholder="e.g. Verma Associates" />
+               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location (Optional)</Label>
+              <Input id="location" {...form.register("location")} placeholder="e.g. Chamber 101" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Textarea id="notes" {...form.register("notes")} placeholder="Additional notes..." />
+            </div>
+            <SheetFooter>
+              <Button type="submit" disabled={createContactMutation.isPending}>
+                {createContactMutation.isPending ? "Adding..." : "Add Contact"}
+              </Button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
     </AppLayout>
   );
 }
 
-function ContactGrid({ contacts }: { contacts: typeof CONTACTS }) {
+function ContactGrid({ contacts, isLoading }: { contacts: any[], isLoading: boolean }) {
+    if (isLoading) {
+        return <div className="text-center py-12 text-muted-foreground">Loading contacts...</div>;
+    }
     if (contacts.length === 0) {
         return <div className="text-center py-12 text-muted-foreground">No contacts found.</div>;
     }
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {contacts.map(contact => (
+            {contacts.map((contact: any) => (
                 <Card key={contact.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6 flex items-start gap-4">
                         <Avatar className="h-12 w-12">
                             <AvatarImage src="" />
                             <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                {contact.avatar}
+                                {contact.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
                         <div className="space-y-1 flex-1">

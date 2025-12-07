@@ -32,9 +32,15 @@ app.get("/health", (req, res) => {
 
 import authRoutes from "./routes/authRoutes";
 import caseRoutes from "./routes/caseRoutes";
+import hearingRoutes from "./routes/hearingRoutes";
+import contactRoutes from "./routes/contactRoutes";
+import documentRoutes from "./routes/documentRoutes";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/cases", caseRoutes);
+app.use("/api/hearings", hearingRoutes);
+app.use("/api/contacts", contactRoutes);
+app.use("/api/documents", documentRoutes);
 
 
 export default app;
