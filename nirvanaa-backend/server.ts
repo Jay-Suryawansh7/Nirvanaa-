@@ -1,7 +1,7 @@
-import app from "./app";
+import app from "./src/app";
 import * as dotenv from "dotenv";
-import { db } from "./config/db";
-import { seedMockData } from "./scripts/seed";
+import { db } from "./src/config/db";
+import { seedMockData } from "./src/scripts/seed";
 import { sql } from "drizzle-orm";
 import { createServer } from "http";
 
