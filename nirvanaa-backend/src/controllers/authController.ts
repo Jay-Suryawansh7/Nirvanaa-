@@ -97,9 +97,7 @@ export const login = async (req: Request, res: Response) => {
     res.status(400).json({ success: false, message: "Login failed", error: error.message });
   }
 };
-    res.status(400).json({ success: false, message: "Login failed", error: error.message });
-  }
-};
+
 
 export const refresh = async (req: Request, res: Response) => {
   try {
