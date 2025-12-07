@@ -21,3 +21,11 @@ export const verifyToken = (token: string) => {
     return null;
   }
 };
+
+export const verifyRefreshToken = (token: string) => {
+  try {
+    return jwt.verify(token, REFRESH_SECRET) as { userId: string; role: string };
+  } catch (error) {
+    return null;
+  }
+};

@@ -97,3 +97,35 @@ export const login = async (req: Request, res: Response) => {
     res.status(400).json({ success: false, message: "Login failed", error: error.message });
   }
 };
+    res.status(400).json({ success: false, message: "Login failed", error: error.message });
+  }
+};
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ success: false, message: "No refresh token provided" });
+    }
+
+    const payload = await import("../utils/jwt").then(m => m.verifyRefreshToken(refreshToken));
+    
+    if (!payload) {
+        return res.status(403).json({ success: false, message: "Invalid or expired refresh token" });
+    }
+
+    // Generate new Access Token
+    const accessToken = await import("../utils/jwt").then(m => m.generateAccessToken(payload.userId, payload.role));
+
+    res.json({ 
+        success: true, 
+        token: accessToken,
+        accessToken,
+        role: payload.role
+    });
+
+  } catch (error) {
+    console.error("Refresh error:", error);
+    res.status(403).json({ success: false, message: "Invalid refresh token" });
+  }
+};

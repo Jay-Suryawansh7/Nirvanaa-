@@ -32,12 +32,35 @@ api.interceptors.response.use(
       const { status, data } = error.response;
 
       if (status === 401) {
-        // Unauthorized - Token likely expired or invalid
-        alert("Session expired. Please login again."); // Replace with Toast if available
+        // Handle Token Refresh
+        const originalRequest = error.config;
+        if (!originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+                const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
+                const newToken = refreshResponse.data.accessToken; // Check if backend returns 'token' or 'accessToken'
+                
+                if (newToken) {
+                    localStorage.setItem("token", newToken);
+                    api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+                    originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+                    return api(originalRequest);
+                }
+            } catch (refreshError) {
+                console.error("Refresh failed:", refreshError);
+                // Fallback to logout
+                localStorage.removeItem("token");
+                localStorage.removeItem("role");
+                localStorage.removeItem("user");
+                window.location.href = "/login";
+                return Promise.reject(refreshError);
+            }
+        }
+        
+        // If retry already failed or other 401
         localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("user");
         window.location.href = "/login";
+      } else if (status === 403) {
       } else if (status === 403) {
         // Forbidden
         console.error("Access Forbidden:", data.message);
