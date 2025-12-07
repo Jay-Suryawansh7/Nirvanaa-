@@ -149,7 +149,9 @@ const MOCK_HEARINGS = [
   { id: "15", caseNumber: "CIV-2025-002500", caseTitle: "Construction Stay Order", type: "Urgent Motion", time: "04:00 PM", endTime: "04:30 PM", date: "2025-12-23", location: "Chambers", judge: "Hon. Justice Iyer", status: "Submitted", priority: "Urgent", description: "Ex-parte motion for stay order on construction.", plaintiff: "Resident", defendant: "Builder", attorneys: ["Adv. Property"], documents: ["Motion", "Affidavit"], history: [] },
 ];
 
-export default function Calendar() {
+import LawyerCalendar from "./LawyerCalendar";
+
+function JudgeCalendar() {
   const role = localStorage.getItem("role") || "Viewer";
   const [date, setDate] = useState<Date | undefined>(new Date(2025, 11, 7)); 
   const [filterType, setFilterType] = useState<string>("all");
@@ -279,7 +281,7 @@ export default function Calendar() {
                        <div className="flex flex-col items-center justify-center min-w-[4.5rem] p-2 rounded bg-primary/5 text-primary">
                           <Clock className="w-5 h-5 mb-1 opacity-80" />
                           <span className="text-sm font-bold text-center leading-tight">{hearing.time.split(' ')[0]}</span>
-                          <span className="text-[10px] uppercase font-medium opacity-70">{hearing.time.split(' ')[1]}</span>
+                          <span className="text-xs font-medium opacity-70">{hearing.time.split(' ')[1]}</span>
                        </div>
 
                        <div className="flex-1 space-y-2 min-w-0">
@@ -498,4 +500,18 @@ export default function Calendar() {
       </Sheet>
     </AppLayout>
   );
+}
+
+export default function Calendar() {
+    const role = localStorage.getItem("role") || "Viewer";
+    
+    // Check if user is a lawyer (case-insensitive)
+    const isLawyer = role.toLowerCase().includes("lawyer") || role.toLowerCase().includes("advocate");
+
+    if (isLawyer) {
+        return <LawyerCalendar />;
+    }
+
+    // Default view (Judge, Court Staff, etc.)
+    return <JudgeCalendar />;
 }
