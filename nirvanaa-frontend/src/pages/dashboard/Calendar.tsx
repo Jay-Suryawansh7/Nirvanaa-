@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon, Clock, MapPin, FileUser, ChevronRight, Plus, MoreHorizontal, Gavel, FileText, User, Printer, X, History, Briefcase, StickyNote } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, FileUser, ChevronRight, Plus, MoreHorizontal, Gavel, FileText, User, Printer, History, Briefcase, StickyNote } from "lucide-react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Rich Mock Data with extended details
 const MOCK_HEARINGS = [
@@ -376,8 +375,9 @@ export default function Calendar() {
       
       {/* Hearing Details Sheet */}
       <Sheet open={!!selectedHearing} onOpenChange={(open) => !open && setSelectedHearing(null)}>
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-xl p-0">
             {selectedHearing && (
+              <ScrollArea className="h-full w-full p-6">
                 <>
                     <SheetHeader className="space-y-4">
                         <div className="flex items-start justify-between">
@@ -492,6 +492,7 @@ export default function Calendar() {
                         </Button>
                     </SheetFooter>
                 </>
+              </ScrollArea>
             )}
         </SheetContent>
       </Sheet>
