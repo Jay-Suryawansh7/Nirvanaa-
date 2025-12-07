@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,14 +9,11 @@ import {
     LayoutDashboard, 
     Gavel, 
     Clock, 
-    FileText, 
     AlertCircle, 
     RefreshCcw, 
     Search, 
-    Filter,
     Download,
     CheckCircle2,
-    XCircle,
     User,
     Building2,
     Send,
@@ -61,7 +58,7 @@ const TODAY_STATS = {
 
 export default function CourtStaffCalendar() {
   const role = localStorage.getItem("role") || "Staff"; // Default/Fallback
-  const [date, setDate] = useState<Date>(new Date(2025, 11, 7)); // Dec 7, 2025
+  const [date] = useState<Date>(new Date(2025, 11, 7)); // Dec 7, 2025
   const [filterStatus, setFilterStatus] = useState("all");
 
   const getStatusColor = (status: string) => {
